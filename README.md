@@ -15,19 +15,19 @@ The system uses a **Hybrid Architecture** combining a Node.js Web App with a Goo
 
 ```mermaid
 graph LR
-    User[User] -->|Prompt| UI[Web UI (D3.js Preview)]
-    UI -->|POST /api/generate| Server[Node.js Express Server]
-    Server -->|Spawns| Agent[Python ADK Agent]
+    User[User] -->|Prompt| UI["Web UI (D3.js Preview)"]
+    UI -->|"POST /api/generate"| Server["Node.js Express Server"]
+    Server -->|Spawns| Agent["Python ADK Agent"]
     
     subgraph "AI Brain (Google ADK)"
-        Agent -->|1. Analyze Request| Model[Gemini 1.5 Pro]
-        Model -->|2. Call Tool| Tool[search_templates()]
-        Tool -->|3. Retrieve Style| Lib[library.json]
-        Lib -->|Return Style| Model
-        Model -->|4. Generate XML| Output[generated/drawio_TIMESTAMP.drawio]
+        Agent -->|"1. Analyze Request"| Model["Gemini 1.5 Pro"]
+        Model -->|"2. Call Tool"| Tool["search_templates()"]
+        Tool -->|"3. Retrieve Style"| Lib["library.json"]
+        Lib -->|"Return Style"| Model
+        Model -->|"4. Generate XML"| Output["generated/drawio_TIMESTAMP.drawio"]
     end
     
-    Output -->|Return content| Server
+    Output -->|"Return content"| Server
     Server -->|Render| UI
 ```
 
