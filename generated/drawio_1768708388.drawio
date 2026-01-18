@@ -1,0 +1,82 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36" version="29.3.2">
+  <diagram name="Transaction System" id="tx_sys_1">
+    <mxGraphModel dx="920" dy="557" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="_act_sys" parent="1" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" value="Account System\n(External)" vertex="1">
+          <mxGeometry height="90" width="140" x="650" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="node1" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="K8s Node 1 (Ingress/Auth)" vertex="1">
+          <mxGeometry height="280" width="220" x="40" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="auth_1" parent="node1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;" value="Auth Module" vertex="1">
+          <mxGeometry height="80" width="80" x="60" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="auth_2" parent="node1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;" value="Auth Module" vertex="1">
+          <mxGeometry height="80" width="80" x="60" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="node2" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="K8s Node 2 (UI Channel)" vertex="1">
+          <mxGeometry height="400" width="220" x="280" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="web_1" parent="node2" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;" value="Web UI" vertex="1">
+          <mxGeometry height="70" width="70" x="20" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="win_1" parent="node2" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#6c8ebf;" value="Win App API" vertex="1">
+          <mxGeometry height="70" width="70" x="110" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="listener_1" parent="node2" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;" value="Listen Tx" vertex="1">
+          <mxGeometry height="80" width="80" x="65" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="node3" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="K8s Node 3 (Core)" vertex="1">
+          <mxGeometry height="400" width="240" x="520" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="queue" parent="node3" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Event Queue" vertex="1">
+          <mxGeometry height="60" width="120" x="60" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="manip_1" parent="node3" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;" value="Manipulate" vertex="1">
+          <mxGeometry height="70" width="70" x="30" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="manip_2" parent="node3" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;" value="Manipulate" vertex="1">
+          <mxGeometry height="70" width="70" x="140" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="summ_1" parent="node3" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;" value="Summary" vertex="1">
+          <mxGeometry height="70" width="70" x="85" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="node4" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=23;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="K8s Node 4 (Data)" vertex="1">
+          <mxGeometry height="150" width="300" x="400" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="rdb" parent="node4" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;" value="RDB (SQL)" vertex="1">
+          <mxGeometry height="80" width="80" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="nosql" parent="node4" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;" value="NoSQL (Mongo)" vertex="1">
+          <mxGeometry height="80" width="80" x="170" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_auth" edge="1" parent="1" source="node1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="_act_sys">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_web_auth" edge="1" parent="1" source="web_1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="auth_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_in_listen" edge="1" parent="1" source="web_1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="listener_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_listen_q" edge="1" parent="1" source="listener_1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="queue">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_q_manip" edge="1" parent="1" source="queue" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="manip_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_manip_rdb" edge="1" parent="1" source="manip_1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="rdb">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_manip_summ" edge="1" parent="1" source="manip_1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="summ_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_summ_nosql" edge="1" parent="1" source="summ_1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="nosql">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
