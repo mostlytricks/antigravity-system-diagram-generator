@@ -43,5 +43,10 @@
         "style": "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;",
         "width": 0,
         "height": 0
+    },
+    "enterprise server": {
+        "style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;",
+        "width": 120,
+        "height": 60
     }
 }

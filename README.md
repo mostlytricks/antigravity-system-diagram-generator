@@ -1,93 +1,72 @@
-# Draw.io AI Architect Agent 🤖📐
+# Draw.io AI Architect 🤖📐
 
-> **An Intelligent Agent that "learns" your diagram styles and generates valid Draw.io XML.**
+> **An Autonomous Agent that "learns" your design patterns and builds expert system diagrams.**
 
 ## 🎯 Project Vision
-The goal of this project is **NOT** just to have an LLM guess XML structures.
-The specific goal is to build an **Enterprise-Grade Diagram Agent** that:
-1.  **Learns specific styles** from your existing `.drawio` files (e.g., "Our company uses *green cubes* for Severs and *blue swimlanes* for Kubernetes").
-2.  **Generates valid Draw.io XML** that can be immediately opened and edited.
-3.  **Visualizes results instantly** in a Web UI before you even download the file.
+This isn't just an LLM guessing XML. This is a **Pattern-Aware Architect** that:
+1.  **Distills Design Style**: Analyzes your existing `.drawio` files to extract specific enterprise styles (e.g., "Our servers are green cubes with 120x80 dimensions").
+2.  **Autonomous Construction**: Uses the Google Agent Development Kit (ADK) to search for styles, build valid XML, and manage its own file persistence.
+3.  **Premium Visualization**: Features a **Notion-style Dark Mode** viewer using D3.js for immediate, high-fidelity diagram verification.
 
 ## 🏗️ Architecture
-
-The system uses a **Hybrid Architecture** combining a Node.js Web App with a Google ADK (Agent Development Kit) Python Agent.
+The system follows a **Hybrid Loop** combining a Node.js Express server with a Python ADK agent.
 
 ```mermaid
-graph LR
-    User[User] -->|Prompt| UI["Web UI (D3.js Preview)"]
-    UI -->|"POST /api/generate"| Server["Node.js Express Server"]
-    Server -->|Spawns| Agent["Python ADK Agent"]
+graph TD
+    User((User)) -->|Upload/Prompt| UI["Notion-Style Web UI"]
+    UI -->|API| Server["Node.js Backend"]
     
     subgraph "AI Brain (Google ADK)"
-        Agent -->|"1. Analyze Request"| Model["Gemini 1.5 Pro"]
-        Model -->|"2. Call Tool"| Tool["search_templates()"]
-        Tool -->|"3. Retrieve Style"| Lib["library.json"]
-        Lib -->|"Return Style"| Model
-        Model -->|"4. Generate XML"| Output["generated/drawio_TIMESTAMP.drawio"]
+        Agent["ADK Architect Agent"]
+        Agent -->|extract_pattern| Lib[("library.json")]
+        Agent -->|search_templates| Lib
+        Agent -->|save_diagram| FS["generated/"]
+        Model["Gemini 1.5 Pro"] <--> Agent
     end
     
-    Output -->|"Return content"| Server
-    Server -->|Render| UI
+    Server -->|Invoke| Agent
+    Agent -->|Result| Server -->|Render| UI
 ```
 
 ### Key Components
-1.  **Frontend (`public/index.html`)**:
-    *   Simple "Teach" & "Build" interface.
-    *   **D3.js Visualizer**: Renders the generated XML instantly in the browser. Supports custom styles like "Orthogonal Edges".
-2.  **Backend (`src/server.js`)**:
-    *   Acts as the bridge between the UI and the Python Agent.
-    *   Handles file reading/writing and process execution.
-3.  **The Agent (`adk_agent_demo.py`)**:
-    *   Built with **Google Agent Development Kit (ADK)** logic.
-    *   **Tool-Use**: It doesn't hallucinate styles. It calls `search_templates('k8s pod')` to get the *exact* XML style definition from `library.json`.
-4.  **Style Database (`library.json`)**:
-    *   A JSON extract of your accepted design components.
-    *   Scalable: You can add new styles (AWS, Azure, etc.) here without retraining the model.
+- **The Agent (`adk_agent_demo.py`)**: A tool-using agent that handles extraction, style lookup, and diagram generation.
+- **Notion Viewer (`public/index.html`)**: A sleek dark-themed D3.js viewer with orthogonal routing and auto-zoom.
+- **Knowledge Base (`library.json`)**: A persistent store of your design tokens and patterns.
 
-## 🚀 How to Use
+## 🚀 Capabilities
 
-### 1. Prerequisities
-*   Node.js & npm
-*   Python 3.9+
-*   Google Gemini API Key
+### 1. Style Extraction (Learning)
+Ask the agent to "learn" from a file. It will analyze the XML, find relevant components, and save their styles and geometry to the library.
+- *Prompt:* "Extract the 'Web Server' style from `sample/web_architecture.drawio` as 'enterprise server'"
 
-### 2. Setup
+### 2. Autonomous Generation
+The agent doesn't just output text; it uses its tools to find the right styles and generate valid Draw.io XML that adheres to your learned patterns.
+- *Prompt:* "Design a HA Kubernetes cluster and save it as 'k8s_design.drawio'"
+
+### 3. Professional Visualization
+Instant rendering of complex Draw.io files with:
+- **Orthogonal Edge Routing**: Clean, non-crossing lines.
+- **Auto-Scale & Fit**: Diagrams are perfectly centered and zoomed.
+- **Notion Dark Theme**: Beautiful, minimal aesthetic for enterprise architects.
+
+## 📂 Getting Started
+
+### Prerequisites
+- Node.js & npm
+- Python 3.9+ (with `google-adk` if available)
+- Google Gemini API Key
+
+### Setup
 ```bash
-# Install Node dependencies
 npm install
-
-# Install Python dependencies (mock or real)
 pip install google-adk google-generative-ai
 ```
 
-### 3. Run the App
+### Run
 ```bash
-# Start the server (runs on localhost:3000)
 node src/server.js
+# Access at http://localhost:3000
 ```
 
-### 4. Workflows
-
-#### A. The "Teach" Workflow (Extraction)
-1.  Go to `http://localhost:3000`.
-2.  Upload an existing `.drawio` file (e.g., `sample/web_architecture.drawio`).
-3.  The D3 Visualizer will render it, proving the system effectively "understands" the nodes and edges.
-4.  *(Future)*: Click "Add to Library" to save these styles to `library.json`.
-
-#### B. The "Build" Workflow (Generation)
-1.  Enter a prompt: *"Design a HA K8s Cluster with 2 Nodes and a Load Balancer."*
-2.  Click **Generate**.
-3.  The system calls the Python Agent -> Agent tools lookup styles -> Generates XML.
-4.  The result appears instantly in the web view.
-5.  Click **Download** to get the `.drawio` file.
-
-## 📂 Project Structure
-*   `adk_agent_demo.py`: The Main Agent logic (Tools + Instructions).
-*   `library.json`: The "Knowledge Base" of diagram styles.
-*   `src/server.js`: The API Server.
-*   `public/`: The Frontend UI.
-*   `generated/`: Folder where AI-created diagrams are saved.
-
 ---
-*Created with the assistance of Antigravity Agent.*
+*Developed with the assistance of Antigravity Agent.*
