@@ -14,7 +14,21 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.pytest_cache/
+.python-version
+
+# UV
+.uv/
+uv.lock
+
+# ADK
+.adk/
+
 # Project Specific
-# We keep 'sample' for library training, but 'generated' might be ignored 
-# if you don't want to sync every test iteration.
-# generated/
+generated/
+uploads/
