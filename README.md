@@ -52,20 +52,48 @@ Instant rendering of complex Draw.io files with:
 ## 📂 Getting Started
 
 ### Prerequisites
-- Node.js & npm
-- Python 3.9+ (with `google-adk` if available)
-- Google Gemini API Key
+- Python 3.9+ (Recommended: `uv`)
+- Google Gemini API Key (Set in `.env` as `GOOGLE_API_KEY`)
 
 ### Setup
+Using `uv` (recommended):
 ```bash
-npm install
+uv sync
+```
+Or with standard pip:
+```bash
 pip install google-adk google-generative-ai
 ```
 
-### Run
+## 🧪 Test Scenarios & Usage
+
+You can interact with the agent directly via the CLI using `adk_agent_demo.py`. This is the best way to verify the library extraction and generation logic.
+
+### 1. Batch Extraction (Learning)
+Verify that the agent can "ingest" multiple design patterns from a single file.
 ```bash
-node src/server.js
-# Access at http://localhost:3000
+python adk_agent_demo.py "learn all patterns from sample/k8s_architecture.drawio"
+```
+**Expected Result:** The agent will report extracting multiple patterns (e.g., 'k8s pod', 'k8s node') and `library.json` will be updated.
+
+### 2. Targeted Component Search
+Check if the agent correctly identifies existing styles before building.
+```bash
+python adk_agent_demo.py "Do we have a 'pod' style in our library? If so, show me the details."
+```
+**Expected Result:** The agent should call `search_templates('pod')` and return the JSON style/geometry.
+
+### 3. End-to-End Generation
+Request a complex diagram that uses the learned patterns.
+```bash
+python adk_agent_demo.py "Design a 3-tier web app with a load balancer, 2 servers, and a database and save it as web_app.drawio"
+```
+**Expected Result:** The agent will generate XML using styles from `library.json` and save it to the `generated/` folder.
+
+### 4. Logic Verification (Dedicated Script)
+For a quick sanity check of the tool logic without LLM latency:
+```bash
+python test_tools.py
 ```
 
 ---

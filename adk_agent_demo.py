@@ -59,36 +59,61 @@ SESSION_ID = "session_k8s_design"
 MODEL_NAME = "gemini-1.5-pro" # Or gemini-2.0-flash
 
 # --- 2. Define the Tool ---
+def list_library() -> Dict[str, Any]:
+    """
+    Returns all currently saved styles and components from library.json.
+    Agent should use this to see what building blocks are already available.
+    """
+    print("\n[TOOL] Listing library contents...")
+    try:
+        import json
+        with open("library.json", "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {"message": "library.json not found. The library is currently empty."}
+
 def search_templates(query: str) -> Dict[str, Any]:
     """
-    Searches for specific diagram element styles (e.g., 'k8s pod', 'database').
-    Returns the style string and default geometry.
+    Searches building blocks (style, width, height) in the library.
+    Agent should call this before trying to build a new component to see if a style already exists.
+    Priority: Exact matches > Fuzzy matches.
     """
     print(f"\n[TOOL] Searching for template: '{query}'...")
     
-    # Load library from external JSON file
     try:
         import json
         with open("library.json", "r") as f:
             library = json.load(f)
     except FileNotFoundError:
-        print("[TOOL] Error: library.json not found. Using empty library.")
-        library = {}
+        return {"error": "library.json not found. Use extract_and_save_pattern to add patterns."}
     
-    # Simple fuzzy search
     query_lower = query.lower()
-    for key, data in library.items():
-        if key in query_lower:
-            print(f"[TOOL] Found template for '{key}'")
-            return data
+    
+    # 1. Exact match check
+    if query_lower in library:
+        print(f"[TOOL] Found exact match for '{query_lower}'")
+        return library[query_lower]
+        
+    # 2. Simple fuzzy search (substring)
+    matches = {k: v for k, v in library.items() if query_lower in k or k in query_lower}
+    if matches:
+        print(f"[TOOL] Found {len(matches)} fuzzy matches for '{query}'")
+        return {"results": matches, "suggestion": "Use one of these keys for a precise style."}
             
-    print(f"[TOOL] No template found for '{query}', returning default.")
-    return {"style": "rounded=0;whiteSpace=wrap;html=1;", "width": 80, "height": 40}
+    print(f"[TOOL] No template found for '{query}', returning default box.")
+    return {
+        "style": "rounded=0;whiteSpace=wrap;html=1;", 
+        "width": 80, 
+        "height": 40, 
+        "message": f"No library entry for '{query}'. Using basic rectangle."
+    }
 
-def extract_and_save_pattern(file_path: str, pattern_name: str) -> str:
+def extract_and_save_pattern(file_path: str, pattern_name: str = "all") -> str:
     """
-    Analyzes a .drawio file, extracts a design pattern (style/geometry),
-    and saves it to library.json.
+    Analyzes an existing .drawio file and extracts style/geometry patterns.
+    - If pattern_name is "all", it tries to extract ALL unique-looking vertex cells.
+    - If pattern_name is specific (e.g. 'k8s pod'), it searches for a cell with that value.
+    This tool is essential when you (the agent) want to 'learn' new designs from user files.
     """
     print(f"\n[TOOL] Extracting pattern '{pattern_name}' from '{file_path}'...")
     
@@ -96,57 +121,69 @@ def extract_and_save_pattern(file_path: str, pattern_name: str) -> str:
     import json
     
     try:
+        if not os.path.exists(file_path):
+            return f"Error: File not found at {file_path}. Use absolute paths if possible."
+
         tree = ET.parse(file_path)
         root = tree.getroot()
         
-        # Find the first vertex that isn't a default one (id=0 or 1)
-        # and optionally matches the pattern_name in its value.
-        target_cell = None
-        for cell in root.findall(".//mxCell"):
-            if cell.get("vertex") == "1" and cell.get("id") not in ["0", "1"]:
-                if not pattern_name or pattern_name.lower() in (cell.get("value") or "").lower():
-                    target_cell = cell
-                    break
+        extracted_count = 0
+        new_patterns = {}
         
-        if target_cell is None:
-            # Fallback to first available vertex if no match found
-            for cell in root.findall(".//mxCell"):
-                if cell.get("vertex") == "1" and cell.get("id") not in ["0", "1"]:
-                    target_cell = cell
-                    break
-
-        if target_cell is None:
-            return f"Error: Could not find any valid vertex cells in {file_path}."
-
-        style = target_cell.get("style", "")
-        geometry = target_cell.find("mxGeometry")
-        
-        if geometry is None:
-            return f"Error: No geometry found for the selected cell."
-
-        width = int(geometry.get("width", "80"))
-        height = int(geometry.get("height", "40"))
-
-        # Load and update library
+        # Load existing library
         try:
             with open("library.json", "r") as f:
                 library = json.load(f)
         except FileNotFoundError:
             library = {}
 
-        library[pattern_name.lower()] = {
-            "style": style,
-            "width": width,
-            "height": height
-        }
+        for cell in root.findall(".//mxCell"):
+            # We only care about vertices (boxes, nodes) and skip the default parent containers (0 and 1)
+            if cell.get("vertex") == "1" and cell.get("id") not in ["0", "1"]:
+                cell_value = (cell.get("value") or "").strip()
+                cell_style = cell.get("style", "")
+                geometry = cell.find("mxGeometry")
+                
+                if not geometry or not cell_style:
+                    continue
+                    
+                width = int(geometry.get("width", "80"))
+                height = int(geometry.get("height", "40"))
+
+                # Logic: If 'all', extract everything that has a value.
+                # If specific name, only extract if name matches.
+                should_extract = False
+                extract_key = ""
+
+                if pattern_name.lower() == "all":
+                    if cell_value:
+                        extract_key = cell_value.lower()
+                        should_extract = True
+                elif cell_value and pattern_name.lower() in cell_value.lower():
+                    extract_key = pattern_name.lower()
+                    should_extract = True
+
+                if should_extract and extract_key:
+                    library[extract_key] = {
+                        "style": cell_style,
+                        "width": width,
+                        "height": height
+                    }
+                    new_patterns[extract_key] = True
+                    extracted_count += 1
+
+        if extracted_count == 0:
+            return f"Agent Note: No suitable cells found in {file_path} for pattern '{pattern_name}'."
 
         with open("library.json", "w") as f:
             json.dump(library, f, indent=4)
 
-        return f"Successfully extracted pattern '{pattern_name}' and saved to library.json."
+        summary = f"Successfully extracted {extracted_count} patterns: {list(new_patterns.keys())}."
+        print(f"[TOOL] {summary}")
+        return summary
 
     except Exception as e:
-        return f"Error during extraction: {str(e)}"
+        return f"Extraction Error: {str(e)}. Please check the file path and format."
 
 def save_diagram(xml_content: str, filename: str) -> str:
     """
@@ -173,25 +210,31 @@ def save_diagram(xml_content: str, filename: str) -> str:
 architect_agent = LlmAgent(
     model=MODEL_NAME,
     name="drawio_architect",
-    description="An expert system architect that generates Draw.io XML.",
+    description="An expert system architect that generates Draw.io XML and manages its own component library.",
     instruction="""
-    You are a Principal Diagram Architect.
-    Your goal is to generate valid Draw.io XML for system architectures AND manage your style library.
-    
-    ### Design Rules (CRITICAL)
-    1.  **Clean Routing**: Edges should NOT cross through other Nodes (containers) unless absolutely necessary.
-    2.  **Orthogonal Lines**: ALWAYS use the "connection" style from the library for edges.
-    3.  **Container Layout**: Arrange cells neatly with padding.
+    You are a Principal Diagram Architect. 
+    Your job is to design professional architectures using Draw.io XML format.
+    You have a persistent library of components (library.json) that you MUST manage and use.
+
+    ### CRITICAL: Handling LLM Reasoning & Errors
+    - When asked to generate a diagram, FIRST check the library using `list_library` or `search_templates`.
+    - If you are missing a style, and the user provided a sample .drawio file, use `extract_and_save_pattern` to LEARN from it.
+    - If extraction returns an error, do not hallucinate a style; instead, use the default style or ask the user for clarification.
+    - Always output valid XML wrapped in <mxfile> tags.
+
+    ### Design Rules
+    1.  **Clean Routing**: Use orthogonal edges. Avoid lines overlapping nodes.
+    2.  **Consistency**: Use the same style/size for identical components (e.g., all 'Pods' should look the same).
+    3.  **Persistence**: Every pattern you extract is saved PERMANENTLY. Build up your expertise over multiple sessions.
     
     ### Workflow
-    1.  **Extraction**: If asked to "learn", "extract", or "analyze" a file, use `extract_and_save_pattern`.
-    2.  **Search**: When building, use `search_templates` to get styles. DO NOT GUESS STYLES.
-    3.  **Construct**: Build the XML using library styles.
-    4.  **Save**: After generating XML, ALWAYS use `save_diagram` to persist it to the 'generated' folder with a descriptive name.
-    5.  **Final Response**: Provide the XML string AND the confirmation from the save tool.
+    1.  **Context**: Use `list_library` to see what you already know.
+    2.  **Extraction**: Use `extract_and_save_pattern(file_path, 'all')` to ingest new designs from user examples.
+    3.  **Design**: Use patterns from `search_templates`.
+    4.  **Save**: Use `save_diagram` to store your final XML in the 'generated' folder.
     """,
-    tools=[search_templates, extract_and_save_pattern, save_diagram], # Giving the agent more "Hands"
-    output_key="final_xml_result" # Where to store the result in the session state
+    tools=[list_library, search_templates, extract_and_save_pattern, save_diagram],
+    output_key="final_xml_result"
 )
 
 # --- 4. Setup Runner & Session ---
